@@ -1,6 +1,12 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+// electron-reload를 초기화합니다.
+require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
+    hardResetMethod: 'exit',
+  });
 
+  
 function createWindow() {
   const win = new BrowserWindow({
     width: 800,
@@ -26,3 +32,4 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
