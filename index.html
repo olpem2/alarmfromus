@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,14 +7,32 @@
 </head>
 <body>
   <div class="container">
-    <h1>SUNGYO ALARM</h1>
+    <h1>SUNGYO ALARM이지롱</h1>
     <p>알람 어플리케이션을 실행합니다.</p>
     <div class="time-info">
       <p id="current-time">현재 시각: <span id="current-time-value"></span></p>
       <p id="next-alarm-time">다음 알람까지 남은 시간: <span id="next-alarm-value"></span></p>
     </div>
     <ul id="schedule-list"></ul>
+    <a href="schedule.html">시간표 보기</a>
+    <button id="speak-button">speak</button> <!-- speak 버튼 추가 -->
   </div>
   <script src="renderer.js"></script>
+  <script src="redering/currentTime.js"></script>
+  <script src="redering/nextAlarmTime.js"></script>
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    // speak 버튼 클릭 시 IPC 메시지를 메인 프로세스로 전달
+    document.getElementById('speak-button').addEventListener('click', () => {
+      ipcRenderer.send('speak-alarm');
+    });
+
+    // IPC 메시지를 받아서 알람 정보를 읽어주는 함수
+    ipcRenderer.on('speak-alarm-response', (event, message) => {
+      alert(message); // 알람 정보를 경고창으로 표시 (음성으로 읽어주도록 수정 가능)
+    });
+  </script>
 </body>
 </html>
+
