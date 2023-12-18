@@ -1,0 +1,13 @@
+{
+  "name": "alarmfromus",
+  "version": "1.0.0",
+  "description": "alarmforbindam",
+  "main": "main.js",
+  "scripts": {
+    "test": "o",
+    "start": "electron ."
+
+  },
+  "author": "",
+  "license": "ISC"
+}
