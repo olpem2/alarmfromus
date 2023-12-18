@@ -2,12 +2,14 @@
   "name": "alarmfromus",
   "version": "1.0.0",
   "description": "alarmforbindam",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "test": "o",
     "start": "electron ."
-
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
 }
