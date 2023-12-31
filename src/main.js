@@ -1,9 +1,12 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-// electron-reload를 초기화합니다.
-require('electron-reload')(__dirname);
+const calculateNextAlarmTime = require('../calculateNextAlarmTime');
+const speakAlarm = require('../speakAlarm'); // speakAlarm.js를 import합니다.
+
+let mainWindow;
+
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -11,10 +14,29 @@ function createWindow() {
     },
   });
 
-  win.loadFile('index.html');
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+  ipcMain.on('speak-alarm', (event) => {
+    const nextAlarmTime = calculateNextAlarmTime();
+    if (nextAlarmTime && typeof nextAlarmTime !== 'string') {
+      const currentTime = new Date();
+      const currentTimeString = `${currentTime.getHours()}:${String(currentTime.getMinutes()).padStart(2, '0')}`;
+      
+      // speakAlarm 모듈을 사용하여 음성 메시지를 출력합니다.
+      speakAlarm(currentTime, nextAlarmTime);
+
+      event.reply('speak-alarm-response', 'Alarm spoken.'); // 음성 출력이 완료되었다는 메시지 전달
+    } else {
+      event.reply('speak-alarm-response', 'There is no next alarm.');
+    }
+  });
+
+  setInterval(sendTimeToRenderer, 1000);
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -28,18 +50,9 @@ app.on('activate', () => {
   }
 });
 
-// 렌더러 프로세스에 시각 및 다음 알람까지 남은 시간을 전달
-const sendTimeToRenderer = () => {
-    const currentTime = new Date();
-    const nextAlarmTime = new Date(); // 여기에 다음 알람 시간을 계산하십시오.
-    const timeUntilNextAlarm = nextAlarmTime - currentTime;
-    mainWindow.webContents.send('update-time', currentTime, timeUntilNextAlarm);
-  };
-  
-  // 앱이 준비되면 시각 정보를 렌더러 프로세스에 전달
-  app.whenReady().then(() => {
-    createWindow();
-    sendTimeToRenderer(); // 초기 시각 전달
-    setInterval(sendTimeToRenderer, 1000); // 1초마다 시각 업데이트 전달
-  });
-  
+function sendTimeToRenderer() {
+  const currentTime = new Date();
+  const nextAlarmTime = calculateNextAlarmTime();
+
+  mainWindow.webContents.send('update-time', currentTime, nextAlarmTime);
+}
